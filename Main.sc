@@ -1,6 +1,7 @@
 import $ivy.`com.googlecode.lanterna:lanterna:3.0.1`
 import com.googlecode.lanterna._
 
+import scala.util._
 import scala.util.control.Exception._
 import scala.collection._
 
@@ -31,11 +32,51 @@ def draw(scr: screen.Screen, grid: Grid): Unit = {
 
 def now() = System.currentTimeMillis
 
-def run() = {
+case class Config(
+  forceTextTerminal: Boolean = false,
+  preferTerminalEmulator: Boolean = false,
+  initialGrid: Either[Patterns.Value, Grid] = Left(Patterns.Acorn),
+  )
+object OptionParser extends scopt.OptionParser[Try[Config]]("conway") {
+  opt[Unit]('t', "force-text-terminal")
+    .action((_, c) => c map { _.copy(forceTextTerminal = true) })
+
+  opt[Unit]('g', "prefer-terminal-emulator")
+    .action((_, c) => c map { _.copy(preferTerminalEmulator = true) })
+
+  opt[String]('p', "initial-grid-pattern")
+    .action((x, c) =>
+      for { c <- c
+            pat <- Try { Patterns.withName(x) }
+      } yield c.copy(initialGrid = Left(pat)))
+
+  arg[String]("initial-grid")
+    .optional
+    .action((x, c) =>
+      for { c <- c
+            g <- Try { rle.parse(x) }
+      } yield c.copy(initialGrid = Right(g)))
+
+  checkConfig({ case Success(_) => success
+                case Failure(e) => failure(f"$e")
+              })
+}
+
+def run(args: Seq[String]): Unit = {
+  val c = OptionParser.parse(args, Success(Config())) match {
+    case None => return
+    case Some(Success(c)) => c
+  }
   val tf = new terminal.DefaultTerminalFactory
-  val term = tf.createTerminal
-  val scr = new screen.TerminalScreen(term)
-  val steps = Iterator.iterate(Acorn)(tick) zip Iterator.iterate(now())(_ + 200)
+  tf setTerminalEmulatorTitle "Conway's Game of Life"
+  tf setForceTextTerminal c.forceTextTerminal
+  tf setPreferTerminalEmulator c.preferTerminalEmulator
+  val scr = tf.createScreen()
+  val init = c.initialGrid match {
+    case Left(pat) => pat.grid
+    case Right(g) => g
+  }
+  val steps = Iterator.iterate(init)(tick) zip Iterator.iterate(now())(_ + 200)
   scr.startScreen()
   ultimately { scr.stopScreen() } {
     for ((grid, inst) <- steps) {

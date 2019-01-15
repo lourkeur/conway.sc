@@ -17,5 +17,5 @@ def test(args: String*): Unit =
   Test.run(args)
 
 @main
-def run(): Unit =
-  Main.run()
+def run(args: String*): Unit =
+  Main.run(args)
