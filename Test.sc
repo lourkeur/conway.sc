@@ -1,8 +1,8 @@
 import $ivy.`org.scalacheck::scalacheck:1.14.0`
 import org.scalacheck._
 
-import $file.conway
-import conway._
+import $file.core
+import core._
 
 /** some cheap basic non-exhaustive correctness tests */
 object Examples extends Properties("examples") {
@@ -27,6 +27,5 @@ object Examples extends Properties("examples") {
   }
 }
 
-@main
-def test(args: String*) =
+def run(args: Seq[String]): Unit =
   Examples.main(args.toArray)

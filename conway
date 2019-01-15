@@ -1,0 +1,21 @@
+#!/usr/bin/env amm
+/** Scala 2.12 KISS implementation of Conway's game of life.
+  *
+  * Run using Ammonite https://ammonite.io
+  *
+  * Inspired by Stop Writing Classes by Jack Diederich,
+  * https://www.youtube.com/watch?v=o9pEzgHorH0
+  *
+  * Ported from https://gist.github.com/lourkeur/95799b35e2d3aac54cdd0e4a7c8d2037 (Python)
+  * Patterns from http://conwaylife.com/wiki"
+  */
+
+import $file.Main, $file.Test
+
+@main
+def test(args: String*): Unit =
+  Test.run(args)
+
+@main
+def run(): Unit =
+  Main.run()
