@@ -23,15 +23,21 @@ def neighbours(c: Point): Seq[Point] = {
 import scala.collection._
 
 type Grid = immutable.Set[Point]
+object Grid {
+  def fromSeq(cs: Seq[Point]): Grid = immutable.Set(cs: _*)
+  def apply(cs: Point*): Grid = fromSeq(cs)
+  def newBuilder: mutable.Builder[Point, Grid] = immutable.Set.newBuilder
+}
 
 def tick(grid: Grid): Grid = {
   val ncount = mutable.Map.empty[Point, Int].withDefaultValue(0)
   for (c <- grid; n <- neighbours(c))
     ncount(n) += 1
-  (for {
-     (c, x) <- ncount.toSeq
-     if (x == 2 && grid.contains(c) || x == 3)
-       } yield c).toSet
+  Grid.fromSeq(
+    for {
+      (c, x) <- ncount.toSeq
+      if (x == 2 && grid.contains(c) || x == 3)
+        } yield c)
 }
 
 /** Simple RLE parser.
@@ -42,7 +48,7 @@ object rle {
   private val EltRx = """(\d*)(b|o)(\$?)""".r
   def parse(data: String): Grid = {
     var x, y = 0
-    val out = immutable.Set.newBuilder[Point]
+    val out = Grid.newBuilder
     for (elt <- EltRx.findAllMatchIn(data)) {
       val Seq(n, tp, eol) = elt.subgroups
       val rep = if (n == null) 1 else n.toInt
