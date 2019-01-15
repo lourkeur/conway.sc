@@ -15,6 +15,7 @@ val DrawCharmap = immutable.Map(
   )
 
 def draw(scr: screen.Screen, grid: Grid): Unit = {
+  scr.doResizeIfNecessary()
   scr.clear()
   val sz = scr.getTerminalSize
   val Y = sz.getRows
