@@ -13,9 +13,7 @@
 import $file.aux.{Main, Test}
 
 @main
-def test(args: String*): Unit =
-  Test.run(args)
-
-@main
-def run(args: String*): Unit =
-  Main.run(args)
+def main(args: String*): Unit = args match {
+  case "--test" +: args => Test.run(args)
+  case args => Main.run(args)
+}
