@@ -79,8 +79,14 @@ def run(args: Seq[String]): Unit = {
   }
   val steps = Iterator.iterate(init)(tick) zip Iterator.iterate(now())(_ + 200)
   scr.startScreen()
+  def isQuitKey(ks: input.KeyStroke) =
+    (ks.getCharacter: Char).toLower == 'q' ||
+      ks.getCharacter == 'c' && ks.isCtrlDown ||
+      ks.getKeyType == input.KeyType.EOF  // happens when terminal gets disconnected
   ultimately { scr.stopScreen() } {
     for ((grid, inst) <- steps) {
+      if (Iterator.continually(scr.pollInput()).takeWhile(_ != null).exists(isQuitKey _))
+        return
       draw(scr, grid)
       Thread.sleep(math.max(0, inst - now()))
       scr.refresh()
