@@ -10,7 +10,7 @@
   * Patterns from http://conwaylife.com/wiki"
   */
 
-import $file.Main, $file.Test
+import $file.aux.{Main, Test}
 
 @main
 def test(args: String*): Unit =
