@@ -72,6 +72,7 @@ def run(args: Seq[String]): Unit = {
   tf setForceTextTerminal c.forceTextTerminal
   tf setPreferTerminalEmulator c.preferTerminalEmulator
   val scr = tf.createScreen()
+  scr setCursorPosition null  // hide cursor
   val init = c.initialGrid match {
     case Left(pat) => pat.grid
     case Right(g) => g
