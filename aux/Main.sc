@@ -15,17 +15,17 @@ val DrawCharmap = immutable.Map(
   (true,  true)  -> new TextCharacter('\u2588'),
   )
 
-def draw(scr: screen.Screen, grid: Grid): Unit = {
+def draw(scr: screen.Screen, grid: Grid, center: (Int, Int)): Unit = {
   scr.doResizeIfNecessary()
   scr.clear()
   val sz = scr.getTerminalSize
-  val Y = sz.getRows
-  val X = sz.getColumns
-  val halfY = Y / 2
-  val halfX = X / 2
-  for (i <- 0 until Y; j <- 0 until X) {
-    val y = (i - halfY) * 2
-    val x = j - halfX
+  val W = sz.getColumns
+  val H = sz.getRows
+  val halfW = W / 2
+  val halfH = H / 2
+  for (i <- 0 until H; j <- 0 until W) {
+    val x = j - halfW - center._1
+    val y = (i - halfH) * 2 - center._2
     scr.setCharacter(j, i, DrawCharmap((grid contains (x,y), grid contains (x,y+1))))
   }
 }
@@ -78,6 +78,7 @@ def run(args: Seq[String]): Unit = {
     case Right(g) => g
   }
   val steps = Iterator.iterate(init)(tick) zip Iterator.iterate(now())(_ + 200)
+  var x, y = 0  // center of the view
   scr.startScreen()
   def isQuitKey(ks: input.KeyStroke) =
     (ks.getCharacter: Char).toLower == 'q' ||
@@ -85,9 +86,23 @@ def run(args: Seq[String]): Unit = {
       ks.getKeyType == input.KeyType.EOF  // happens when terminal gets disconnected
   ultimately { scr.stopScreen() } {
     for ((grid, inst) <- steps) {
-      if (Iterator.continually(scr.pollInput()).takeWhile(_ != null).exists(isQuitKey _))
-        return
-      draw(scr, grid)
+      for (ks <- Iterator.continually(scr.pollInput()).takeWhile(_ != null)) {
+        if (isQuitKey(ks)) {
+          return
+        }
+        ks.getKeyType match {
+          case input.KeyType.ArrowDown =>
+            y -= 1
+          case input.KeyType.ArrowLeft =>
+            x += 1
+          case input.KeyType.ArrowRight =>
+            x -= 1
+          case input.KeyType.ArrowUp =>
+            y += 1
+          case _ =>
+        }
+      }
+      draw(scr, grid, (x, y))
       Thread.sleep(math.max(0, inst - now()))
       scr.refresh()
     }

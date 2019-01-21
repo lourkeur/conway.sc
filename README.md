@@ -3,7 +3,7 @@
 - Can be run with Lanterna's terminal emulator
 - Pass arbitrary initial grid in RLE notation
 - Infinite grid
-- ~~View can scroll~~ **TODO**
+- View can scroll
 ## Usage
 Install [Ammonite,](https://ammonite.io/) then invoke `./conway` at the command line. For more options, use the builtin help `./conway --help`.
 ## History
