@@ -33,22 +33,21 @@ def tick(grid: Grid): Grid = {
   * Not accounted for: the usual ! terminator for RLE-encoded patterns on the internet.
   */
 object rle {
-  private val EltRx = """(\d*)(b|o)(\$?)""".r
+  private val EltRx = """(\d*)([bo$])""".r
   def parse(data: String): Grid = {
     var x, y = 0
     val out = Grid.newBuilder
     for (elt <- EltRx.findAllMatchIn(data)) {
-      val Seq(n, tp, eol) = elt.subgroups
+      val Seq(n, tp) = elt.subgroups
       val rep = if (n == "") 1 else n.toInt
       if (tp == "o")
         for (i <- 0 until rep)
           out += ((x + i, y))
-      if (eol == "")
-        x += rep
-      else {
+      if (tp == "$") {
         x = 0
-        y += 1
-      }
+        y += rep
+      } else
+        x += rep
     }
     out.result
   }
@@ -73,4 +72,5 @@ object Patterns extends Enumeration {
   val Mess = Val("3bo$3bobo$3b2o$o$b2o$2o")
   val RPentomino = Val("b2o$2ob$bo")
   val Toad = Val("b3o$3o")
+  val Copperhead = Val("b2o2b2o$3b2o$3b2o$obo2bobo$o6bo2$o6bo$b2o2b2o$2b4o2$3b2o$3b2o")
 }
