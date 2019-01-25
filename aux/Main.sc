@@ -35,7 +35,7 @@ def now() = System.currentTimeMillis
 case class Config(
   forceTextTerminal: Boolean = false,
   preferTerminalEmulator: Boolean = false,
-  initialGrid: Either[Patterns.Value, Grid] = Left(Patterns.Acorn),
+  initialGrid: Either[Patterns.Value, Grid] = Left(Patterns.GosperGliderGun),
   )
 object OptionParser extends scopt.OptionParser[Try[Config]]("conway") {
   note("Play Conway's Game of Life in TUI.")
