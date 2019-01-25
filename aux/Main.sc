@@ -38,24 +38,34 @@ case class Config(
   initialGrid: Either[Patterns.Value, Grid] = Left(Patterns.Acorn),
   )
 object OptionParser extends scopt.OptionParser[Try[Config]]("conway") {
+  note("Play Conway's Game of Life in TUI.")
+  note("You can use the arrow keys to move around on the grid.")
+
   opt[Unit]('t', "force-text-terminal")
+    .text("use the console even if the system has a graphical environment")
     .action((_, c) => c map { _.copy(forceTextTerminal = true) })
 
   opt[Unit]('g', "prefer-terminal-emulator")
+    .text("prefer the graphical terminal emulator to the console")
     .action((_, c) => c map { _.copy(preferTerminalEmulator = true) })
 
   opt[String]('p', "initial-grid-pattern")
+    .text("select a built-in pattern for the initial state of the grid")
     .action((x, c) =>
       for { c <- c
             pat <- Try { Patterns.withName(x) }
       } yield c.copy(initialGrid = Left(pat)))
 
-  arg[String]("initial-grid")
+  arg[String]("initial-grid").text("supply an initial grid in RLE format")
     .optional
     .action((x, c) =>
       for { c <- c
             g <- Try { rle.parse(x) }
       } yield c.copy(initialGrid = Right(g)))
+
+  help("help").text("display this message")
+
+  note(f"The following built-in patterns are available: ${Patterns.values mkString ","}")
 
   checkConfig({ case Success(_) => success
                 case Failure(e) => failure(f"$e")
